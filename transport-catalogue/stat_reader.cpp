@@ -11,35 +11,45 @@ void stat_reader(transport_catalog::TransportCatalogue& catalog, std::istream& i
     auto pos_1 = text.find_first_not_of(" ");
     auto pos_2 = text.find_first_of(" ",pos_1);
     if(text.substr(pos_1,pos_2 - pos_1) == "Bus") {
-    if((catalog.FindBus(text.substr(pos_2 + 1))).name != "not found") {
-        auto bus = catalog.FindBus(text.substr(pos_2 + 1));  
-        std::cout <<"Bus "<< bus.name <<": "<< bus.stops.size() <<" stops on route, "<< bus.unique.size()<<" unique stops, "<<bus.dist<<" route length, "<< bus.cur <<" curvature"<< std::endl;
+        For_bus(catalog,text.substr(pos_2 + 1),std::cout);
     }
     else {
-        std::cout <<"Bus "<<text.substr(pos_2 + 1)<<": not found" << std::endl;
-    }
-    }
-    else {
-          if((*(catalog.FindStop(text.substr(pos_2 + 1)))).name != "not found") {
-        auto stop = catalog.FindStop(text.substr(pos_2 + 1));  
-        std::cout <<"Stop "<< stop->name <<": ";
-        if((catalog.stop_bus).at(stop).size() != 0) {
-            std::cout << "buses ";
-            for(auto i : (catalog.stop_bus).at(stop)) {
-                std::cout << i << " ";
-            }
-            std::cout << std::endl;
-        }
-        else {
-            std::cout << "no buses" << std::endl;
-        }
-    }
-    else {
-        std::cout <<"Stop "<<text.substr(pos_2 + 1)<<": not found" << std::endl;
-    }
+        For_stop(catalog,text.substr(pos_2 + 1),std::cout);
     }
     ++i;
     }
 }
+        
+std::ostream& For_bus(transport_catalog::TransportCatalogue& catalog, const std::string& bus, std::ostream& out) {
+      if(catalog.FindBus(bus).name != "not found") {
+        auto bus_ = catalog.FindBus(bus);  
+        out <<"Bus "<< bus_.name <<": "<< bus_.stops.size() <<" stops on route, "<< bus_.unique.size()<<" unique stops, "<<bus_.dist_cur<<" route length, "<< bus_.cur <<" curvature"<< std::endl;
+    }
+    else {
+        out <<"Bus "<< bus <<": not found" << std::endl;
+    }
+    return out;
+}
+        
+std::ostream& For_stop(transport_catalog::TransportCatalogue& catalog, const std::string& stop, std::ostream& out) {
+         if((*(catalog.FindStop(stop))).name != "not found") {
+        auto stop_ = catalog.FindStop(stop);  
+        out <<"Stop "<< stop_->name <<": ";
+        if((catalog.stop_bus).at(stop_).size() != 0) {
+            out << "buses ";
+            for(auto i : (catalog.stop_bus).at(stop_)) {
+                out << i << " ";
+            }
+            out << std::endl;
+        }
+        else {
+            out << "no buses" << std::endl;
+        }
+    }
+    else {
+        out <<"Stop "<< stop <<": not found" << std::endl;
+    }
+    return out;
+}        
     }
 }

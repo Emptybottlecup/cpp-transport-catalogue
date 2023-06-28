@@ -4,7 +4,7 @@ namespace transport_catalog {
 void input_reader(TransportCatalogue& catalog, std::istream& input) {
     std::vector<std::string> stops;
     std::vector<std::string> routs;
-    std::map<std::string,std::vector<std::pair<std::string,double>>> stop_dist;
+    distance_all_stops stop_dist;
     std::string text;
     getline(input,text);
     int g = atof(text.c_str());
@@ -27,12 +27,12 @@ void input_reader(TransportCatalogue& catalog, std::istream& input) {
         ++k;
     }
     
-    for(auto stop : stops) {
-        catalog.AddStop(stop);
+    for(const auto& stop : stops) {
+        catalog.AddStop(Split_stop_str(stop));
     }
     catalog.AddDist(stop_dist);
     for(auto route : routs) {
-        catalog.AddBus(route);    
+        catalog.AddBus(Split_route_str(route,catalog));    
     }
 }
 
@@ -117,5 +117,72 @@ std::vector<std::pair<std::string,double>> Split_dist(std::string text) {
     }
     return vec;
 }
-    }
+        
+transport_catalog::road_objects::Stop Split_stop_str(const std::string& stop) {
+        transport_catalog::road_objects::Stop stop_;
+        auto pos = stop.find(':');
+        stop_.name = stop.substr(0,pos);
+        auto pos_2 = stop.find_first_of(' ',pos);
+        stop_.latitude = atof((stop.substr(pos + 1,pos_2 - pos + 1)).c_str());
+        stop_.longitude = atof(stop.substr(pos_2).c_str());
+        return stop_;
 }
+        
+transport_catalog::road_objects::Route Split_route_str(const std::string& route,TransportCatalogue& catalog) {
+    road_objects::Route route_;
+    auto start_stop = route.find('-');
+    if(start_stop != route.npos) {
+    route_.name = route.substr(0,start_stop - 1);
+    if(route[start_stop] == '-') {
+            bool work = true;
+            std::string literals = " -,";
+            std::set<std::string> uni;
+            while (work) {
+                start_stop = route.find_first_not_of(literals, start_stop);
+                if (start_stop != route.npos) {
+                    auto end_stop = route.find_first_of(',', start_stop);
+                    
+if(uni.count(route.substr(start_stop,end_stop-start_stop)) == 0) {
+ route_.unique.push_back(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop)));
+ catalog.stop_bus.at(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop))).insert(route_.name);
+ uni.insert(route.substr(start_stop,end_stop-start_stop));   
+};                    
+                   route_.stops.push_back(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop))); 
+                    
+                    start_stop = end_stop;
+            }
+                else {
+                    work = false;
+                }
+            }
+        for(int i = route_.stops.size() - 2; i >= 0; --i) {
+             route_.stops.push_back(route_.stops[i]);
+        }
+        }
+    }  
+    else {
+            start_stop = route.find('>');
+            route_.name = route.substr(0,start_stop - 1);
+            bool work = true;
+            std::string literals = " >,";
+            std::set<std::string> uni;
+            while (work) {
+                start_stop = route.find_first_not_of(literals, start_stop);
+                if (start_stop != route.npos) {
+                    auto end_stop = route.find_first_of(',', start_stop);
+                    if(uni.count(route.substr(start_stop,end_stop-start_stop)) == 0) {
+ route_.unique.push_back(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop)));
+ catalog.stop_bus.at(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop))).insert(route_.name);
+ uni.insert(route.substr(start_stop,end_stop-start_stop));   
+};                   route_.stops.push_back(catalog.get_stops_map().at(route.substr(start_stop,end_stop-start_stop)));        
+                    start_stop = end_stop;
+            }
+                else {
+                    work = false;
+                }
+            }
+     }
+    return route_;
+}        
+}               
+    }
