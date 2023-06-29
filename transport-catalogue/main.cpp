@@ -5,6 +5,6 @@
 
 int main() {
     transport_catalog::TransportCatalogue cata;
-    transport_catalog::reader::input_reader(cata,std::cin);
-    transport_catalog::reader::stat_reader(cata, std::cin);
+    transport_catalog::reader::InputReader(cata,std::cin);
+    transport_catalog::reader::StatReader(cata, std::cin);
 }

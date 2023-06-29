@@ -1,7 +1,7 @@
 #include "input_reader.h"
 namespace transport_catalog {
     namespace reader {
-void input_reader(TransportCatalogue& catalog, std::istream& input) {
+void InputReader(TransportCatalogue& catalog, std::istream& input) {
     std::vector<std::string> stops;
     std::vector<std::string> routs;
     distance_all_stops stop_dist;
@@ -11,14 +11,14 @@ void input_reader(TransportCatalogue& catalog, std::istream& input) {
     int k = 0;
     while(k != g)  {
         getline(input,text);
-        if(Check(text) == "stop") {
+        if(GetObjectType(text) == "stop") {
             stops.push_back(Split(text));
             auto pos_1 = text.find_first_not_of(' ');
             auto pos_2 = text.find_first_of(' ', pos_1);
             auto pos_3 = text.find(":", pos_1);
             std::string name = text.substr(pos_2 + 1, pos_3 - pos_2 - 1);
             if(text.find(" to") != text.npos) {
-            stop_dist.insert(make_pair(name,Split_dist(text)));
+            stop_dist.insert(make_pair(name,SplitDist(text)));
             }
         }
         else {
@@ -28,17 +28,17 @@ void input_reader(TransportCatalogue& catalog, std::istream& input) {
     }
     
     for(const auto& stop : stops) {
-        catalog.AddStop(Split_stop_str(stop));
+        catalog.AddStop(SplitStopStr(stop));
     }
     catalog.AddDist(stop_dist);
     for(auto route : routs) {
-        catalog.AddBus(Split_route_str(route,catalog));    
+        catalog.AddBus(SplitRouteStr(route,catalog));    
     }
 }
 
 std::string Split(const std::string& text) {
     std::string all_text;
-    if (Check(text) == "stop") {
+    if (GetObjectType(text) == "stop") {
         auto pos_1 = text.find_first_not_of(' ');
         auto pos_2 = text.find_first_of(' ', pos_1);
         auto pos_3 = text.find(":", pos_1);
@@ -80,7 +80,7 @@ std::string Split(const std::string& text) {
 }
 
 
-std::string Check (const std::string& text) {
+std::string GetObjectType (const std::string& text) {
     auto pos_1 = text.find_first_not_of(' ');
     auto pos_2 = text.find_first_of(' ', pos_1);
     if (text.substr(pos_1, pos_2 - pos_1) == "Stop") {
@@ -91,7 +91,7 @@ std::string Check (const std::string& text) {
     }
 }
 
-std::vector<std::pair<std::string,double>> Split_dist(std::string text) {
+std::vector<std::pair<std::string,double>> SplitDist(std::string text) {
     std::vector<std::pair<std::string,double>> vec;
     std::string name;
     auto pos_1 = text.find_first_not_of(' ');
@@ -118,7 +118,7 @@ std::vector<std::pair<std::string,double>> Split_dist(std::string text) {
     return vec;
 }
         
-transport_catalog::road_objects::Stop Split_stop_str(const std::string& stop) {
+transport_catalog::road_objects::Stop SplitStopStr(const std::string& stop) {
         transport_catalog::road_objects::Stop stop_;
         auto pos = stop.find(':');
         stop_.name = stop.substr(0,pos);
@@ -128,7 +128,7 @@ transport_catalog::road_objects::Stop Split_stop_str(const std::string& stop) {
         return stop_;
 }
         
-transport_catalog::road_objects::Route Split_route_str(const std::string& route,TransportCatalogue& catalog) {
+transport_catalog::road_objects::Route SplitRouteStr(const std::string& route,TransportCatalogue& catalog) {
     road_objects::Route route_;
     auto start_stop = route.find('-');
     if(start_stop != route.npos) {
