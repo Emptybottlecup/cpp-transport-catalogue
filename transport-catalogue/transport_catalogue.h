@@ -7,22 +7,28 @@
 #include <string_view>
 #include <unordered_map>
 #include <set>
-typedef std::map<std::string,std::vector<std::pair<std::string,double>>> distance_all_stops;
+#include "geo.h"
+
 namespace transport_catalog {
 namespace road_objects {
 struct Stop {
+    Stop() {}
+    Stop(std::string name_, geo::Coordinates coord_) : name(name_), coord(coord_) {}
     std::string name;
-    double latitude;
-    double longitude;
+    geo::Coordinates coord;
+    std::set<std::string> buses;
 };
     
 struct Route {
+    Route() {}
+    Route(std::string name_, std::vector<Stop*> stops_, bool is_roudtrip_) : name(name_), stops(stops_), is_roundtrip(is_roudtrip_) {}
     std::string name;
     double dist_fact = 0;
-    double dist_cur = 0;
     double cur = 0;
     std::vector<Stop*> stops;
-    std::vector<Stop*> unique;
+    std::vector<Stop*> un_stop;
+    std::set<Stop*> unique;
+    bool is_roundtrip;
 };
 }
 
@@ -32,13 +38,15 @@ private:
     std::deque<road_objects::Stop> stops;
     std::deque<road_objects::Route> routs;
     std::map<std::string_view,road_objects::Route*> routs_map;
-    std::map<std::pair<road_objects::Stop*,road_objects::Stop*>,double> stop_dist;
+    std::map<std::pair<std::string,std::string>,int> dist;
 public:
-    void AddStop(road_objects::Stop&& stop_);
-    void AddBus(road_objects::Route&& route);
-    void AddDist(const std::map<std::string,std::vector<std::pair<std::string,double>>>& dist);
-    road_objects::Route FindBus(const std::string& bus) const;
-    road_objects::Stop* FindStop(const std::string& name) const;
+    std::map<std::string_view,road_objects::Route*> GetBus();
+    void SetDist(std::string from, std::string to, int dist_);    
+    int GetDist(std::string from, std::string to);
+    void AddStop(std::string name, geo::Coordinates coordinates);
+    void AddBus(std::string name, std::vector<road_objects::Stop*> stops, bool is_roundtrip);
+    road_objects::Route* FindBus(std::string bus) const;
+    road_objects::Stop* FindStop(std::string name) const;
     std::unordered_map<road_objects::Stop*,std::set<std::string>> stop_bus;
     std::map<std::string_view,road_objects::Stop*>& get_stops_map();
 };
