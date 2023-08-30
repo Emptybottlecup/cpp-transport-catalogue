@@ -5,20 +5,20 @@ using namespace std;
 namespace json {
  bool Node::operator == (const Node& node) const {
     if(visit(IsAnyValue{},GetValue()) == visit(IsAnyValue{},node.GetValue())) {
-        return value_ == node.GetValue();    
+        return *this == node.GetValue();
     }
     return false;
 }
     
 bool Node::operator != (const Node& node) const {
     if(visit(IsAnyValue{},GetValue()) == visit(IsAnyValue{},node.GetValue())) {
-        return !(value_ == node.GetValue());    
+        return !(*this == node.GetValue());
     }
     return true;
 }    
     
 bool Node::IsInt() const {
-     if (visit(IsAnyValue{},GetValue()) == "INT") {
+     if (visit(IsAnyValue{},GetValue()) == ValueType::INT) {
         return true;
     } else {
         return false;
@@ -26,7 +26,7 @@ bool Node::IsInt() const {
 }
     
 bool Node::IsDouble() const {
-     if (visit(IsAnyValue{},GetValue()) == "INT" || visit(IsAnyValue{},value_) == "DOUBLE") {
+     if (visit(IsAnyValue{},GetValue()) == ValueType::INT || visit(IsAnyValue{},GetValue()) == ValueType::DOUBLE) {
         return true;
     } else {
         return false;
@@ -34,7 +34,7 @@ bool Node::IsDouble() const {
 }
     
  bool Node::IsPureDouble() const {
-     if (visit(IsAnyValue{},GetValue()) == "DOUBLE") {
+     if (visit(IsAnyValue{},GetValue()) == ValueType::DOUBLE) {
         return true;
     } else {
         return false;
@@ -42,7 +42,7 @@ bool Node::IsDouble() const {
 }
     
  bool Node::IsBool() const {
-     if (visit(IsAnyValue{},GetValue()) == "BOOL") {
+     if (visit(IsAnyValue{},GetValue()) == ValueType::BOOL_) {
         return true;
     } else {
         return false;
@@ -50,7 +50,7 @@ bool Node::IsDouble() const {
 }   
 
 bool Node::IsString() const {
-     if (visit(IsAnyValue{},GetValue()) == "STRING") {
+     if (visit(IsAnyValue{},GetValue()) == ValueType::STRING) {
         return true;
     } else {
         return false;
@@ -58,7 +58,7 @@ bool Node::IsString() const {
 }   
     
 bool Node::IsNull() const {
-    if (visit(IsAnyValue{},GetValue()) == "NULL") {
+    if (visit(IsAnyValue{},GetValue()) == ValueType::NULL_) {
         return true;
     } else {
         return false;
@@ -66,7 +66,7 @@ bool Node::IsNull() const {
 }
     
 bool Node::IsArray() const {
-        if (visit(IsAnyValue{},GetValue()) == "ARRAY") {
+        if (visit(IsAnyValue{},GetValue()) == ValueType::ARRAY) {
             return true;
         }
         
@@ -76,7 +76,7 @@ bool Node::IsArray() const {
     }
     
     bool Node::IsMap() const {
-        if (visit(IsAnyValue{},GetValue()) == "DICT") {
+        if (visit(IsAnyValue{},GetValue()) == ValueType::DICT) {
            return true;
         } 
         else {
@@ -85,46 +85,46 @@ bool Node::IsArray() const {
     }
     
     int Node::AsInt() const {
-        if(visit(IsAnyValue{},GetValue()) != "INT") {
+        if(visit(IsAnyValue{},GetValue()) != ValueType::INT) {
            throw std::logic_error("Other Type");
        }
-       return get<int>(value_);
+       return get<int>(*this);
    }
     
     bool Node::AsBool() const {
-        if(visit(IsAnyValue{},GetValue()) != "BOOL") {
+        if(visit(IsAnyValue{},GetValue()) != ValueType::BOOL_) {
            throw std::logic_error("Other Type");
        }
-       return get<bool>(value_);
+       return get<bool>(*this);
     }
     
     double Node::AsDouble() const {
-        if(visit(IsAnyValue{},GetValue()) != "DOUBLE" && visit(IsAnyValue{},GetValue()) != "INT") {
+        if(visit(IsAnyValue{},GetValue()) != ValueType::DOUBLE && visit(IsAnyValue{},GetValue()) != ValueType::INT) {
            throw std::logic_error("Other Type");
        }
-        if(visit(IsAnyValue{},GetValue()) == "INT") {
-            return static_cast<double>(get<int>(value_));
+        if(visit(IsAnyValue{},GetValue()) == ValueType::INT) {
+            return static_cast<double>(get<int>(*this));
         }
-       return get<double>(value_);
+       return get<double>(*this);
     }
     
     const std::string& Node::AsString() const {
-        if(visit(IsAnyValue{},GetValue()) != "STRING") {
+        if(visit(IsAnyValue{},GetValue()) != ValueType::STRING) {
            throw std::logic_error("Other Type");
        }
-       return get<std::string>(value_);    
+       return get<std::string>(*this);
     }
     const Array& Node::AsArray() const {
-                if(visit(IsAnyValue{},GetValue()) != "ARRAY") {
+                if(visit(IsAnyValue{},GetValue()) != ValueType::ARRAY) {
            throw std::logic_error("Other Type");
        }
-       return get<Array>(value_);    
+       return get<Array>(*this);
     }
     const Dict& Node::AsMap() const {
-              if(visit(IsAnyValue{},GetValue()) != "DICT") {
+              if(visit(IsAnyValue{},GetValue()) != ValueType::DICT) {
            throw std::logic_error("Other Type");
        }
-       return get<Dict>(value_);  
+       return get<Dict>(*this);
     }
     
 Node LoadNode(istream& input);
@@ -353,35 +353,6 @@ Node LoadNode(istream& input) {
     input.putback(c);
     return LoadNumber(input);
 } 
-
-Node::Node() {}
-
-Node::Node(std::nullptr_t) : value_(nullptr){
-}
-    
-Node::Node(Array array)
-    : value_(move(array)) {
-}
-
-Node::Node(Dict map)
-    : value_(move(map)) {
-}
-
-Node::Node(int value)
-    : value_(value) {
-}
-
-Node::Node(std::string value)
-    : value_(move(value)) {
-}
-    
- Node::Node(bool value)
-    : value_(move(value)) {
-}
-    
-Node::Node(double value)
-    : value_(move(value)) {
-}    
 
 Document::Document(Node root)
     : root_(move(root)) {

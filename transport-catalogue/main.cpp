@@ -5,5 +5,5 @@
 
 int main() {
     transport_catalog::TransportCatalogue cata;
-    ReadandRequests(cata, std::cin);
+    ReadRequests(cata, std::cin);
 }

@@ -20,45 +20,47 @@ public:
     using runtime_error::runtime_error;
 };
 
-    
+enum class ValueType {
+    NULL_,
+    ARRAY,
+    DICT,
+    BOOL_,
+    INT,
+    DOUBLE,
+    STRING,
+};
+
 struct IsAnyValue {
-    std::string operator()(std::nullptr_t) const {
-        return "NULL";    
+    ValueType operator()(std::nullptr_t) const {
+        return ValueType::NULL_;
     }
-    std::string operator()([[maybe_unused]] Array arr_) const {
-        return "ARRAY";    
+    ValueType operator()([[maybe_unused]] Array arr_) const {
+        return ValueType::ARRAY;
     }
-    std::string operator()([[maybe_unused]] Dict dict_) const {
-        return "DICT";    
+    ValueType operator()([[maybe_unused]] Dict dict_) const {
+        return ValueType::DICT;
     }
-    std::string operator()([[maybe_unused]] bool bool_) const {
-        return "BOOL";    
+    ValueType operator()([[maybe_unused]] bool bool_) const {
+        return ValueType::BOOL_;
     }
-    std::string operator()([[maybe_unused]] int int_) const {
-        return "INT";    
+    ValueType operator()([[maybe_unused]] int int_) const {
+        return ValueType::INT;
     }
     
-    std::string operator()([[maybe_unused]] double double_) const {
-        return "DOUBLE";    
+    ValueType operator()([[maybe_unused]] double double_) const {
+        return ValueType::DOUBLE;
     }
-     std::string operator()([[maybe_unused]] std::string string_) const {
-        return "STRING";    
+    ValueType operator()([[maybe_unused]] std::string string_) const {
+        return ValueType::STRING;
     }
 };
     
-class Node {
+class Node : private std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string> {
 public:
    /* Реализуйте Node, используя std::variant */
-    using Value = std::variant<std::nullptr_t, Array, Dict, bool, int, double, std::string>;
-    Node();
-    Node(std::nullptr_t);
-    Node(Array array);
-    Node(Dict map);
-    Node(int value);
-    Node(std::string value);
-    Node(bool value);
-    Node(double value);
-    const Value& GetValue() const { return value_; }
+    using variant::variant;
+    using Value = variant;
+    const Value& GetValue() const { return *this; }
     bool IsInt() const;
     bool IsDouble() const;
     bool IsPureDouble() const;
@@ -74,9 +76,7 @@ public:
     const Array& AsArray() const;
     const Dict& AsMap() const;
     bool operator == (const Node& node) const;
-    bool operator != (const Node& node) const; 
-private:
-    Value value_;
+    bool operator != (const Node& node) const;
 };
 
 class Document {

@@ -39,15 +39,15 @@ private:
     std::deque<road_objects::Route> routs;
     std::map<std::string_view,road_objects::Route*> routs_map;
     std::map<std::pair<std::string,std::string>,int> dist;
+    std::unordered_map<road_objects::Stop*,std::set<std::string>> stop_bus;
 public:
     std::map<std::string_view,road_objects::Route*> GetBus();
-    void SetDist(std::string from, std::string to, int dist_);    
-    int GetDist(std::string from, std::string to);
-    void AddStop(std::string name, geo::Coordinates coordinates);
-    void AddBus(std::string name, std::vector<road_objects::Stop*> stops, bool is_roundtrip);
+    void SetDistance(std::string from, std::string to, int dist_);
+    int GetDistance(std::string from, std::string to);
+    void AddStop(const std::string& name, geo::Coordinates coordinates);
+    void AddBus(const std::string& name, std::vector<road_objects::Stop*>& stops, bool is_roundtrip);
     road_objects::Route* FindBus(std::string bus) const;
     road_objects::Stop* FindStop(std::string name) const;
-    std::unordered_map<road_objects::Stop*,std::set<std::string>> stop_bus;
-    std::map<std::string_view,road_objects::Stop*>& get_stops_map();
+    std::map<std::string_view,road_objects::Stop*>& GetStopsMap();
 };
 }
