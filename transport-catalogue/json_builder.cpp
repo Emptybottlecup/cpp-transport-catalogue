@@ -10,8 +10,11 @@ Builder::Builder() {
 DictKeyContext Builder::Key(std::string key) {
     auto* top_node = nodes_stack_.back();
 
-    if (top_node->IsDict() && !key_) key_ = std::move(key);
-    else throw std::logic_error("Wrong map key: " + key);
+    if (top_node->IsDict()) { 
+        key_ = std::move(key);
+        nodes_stack_.emplace_back(&(std::get<Dict>(*top_node)[key]));
+    }
+    else throw std::logic_error("Wrong map key");
 
     return *this;
 }
@@ -110,14 +113,9 @@ Node Builder::Build() {
 }
 
 Node Builder::GetNode(Node::Value value) {
-    if (std::holds_alternative<int>(value)) return Node(std::get<int>(value));
-    if (std::holds_alternative<double>(value)) return Node(std::get<double>(value));
-    if (std::holds_alternative<std::string>(value)) return Node(std::get<std::string>(value));
-    if (std::holds_alternative<std::nullptr_t>(value)) return Node(std::get<std::nullptr_t>(value));
-    if (std::holds_alternative<bool>(value)) return Node(std::get<bool>(value));
-    if (std::holds_alternative<Dict>(value)) return Node(std::get<Dict>(value));
-    if (std::holds_alternative<Array>(value)) return Node(std::get<Array>(value));
-    return {};
+    Node val;
+    val.GetValue() = value;
+    return val;
 }
 
 DictItemContext::DictItemContext(Builder& builder)
