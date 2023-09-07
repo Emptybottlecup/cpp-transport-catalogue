@@ -20,12 +20,10 @@ public:
     ArrayItemContext StartArray();
     Builder& EndArray();
     Node Build();
-    Node GetNode(Node::Value value);
-
 private:
     Node root_{ nullptr };
     std::vector<Node*> nodes_stack_;
-    std::optional<std::string> key_{ std::nullopt };
+    Node GetNode(Node::Value value);
 };
 
 class DictItemContext {
