@@ -1,6 +1,6 @@
 #include "json_reader.h" 
 #include "json_builder.h" 
- 
+
 namespace transport_catalog { 
     namespace reader { 
         void InputReader(TransportCatalogue& catalog, json::Document& base_and_stat ) { 
@@ -103,8 +103,8 @@ json::Node PrintStop(json::Dict map,TransportCatalogue& catalog) {
   return result; 
 }
     
-json::Node PrintRouting(json::Dict map,transport::Router& router) {
-    json::Node result;
+json::Node PrintRouting(json::Dict map,TransportRouter& router, TransportCatalogue& cata) {
+json::Node result;
 int id = map.at("id").AsInt();
 std::string stop_from = map.at("from").AsString();
 std::string stop_to = map.at("to").AsString();
@@ -119,38 +119,29 @@ if (!routing) {
 }
 else {
     json::Array items;
-    double total_time = 0.0;
     items.reserve(routing.value().edges.size());
     for (auto& edge_id : routing.value().edges) {
         const graph::Edge<double> edge = router.GetGraph().GetEdge(edge_id);
-        if (edge.quality == 0) {
             items.emplace_back(json::Node(json::Builder{}
                 .StartDict()
-                    .Key("stop_name").Value(edge.name)
-                    .Key("time").Value(edge.weight)
+                    .Key("stop_name").Value((cata.GetStopsMap()).at(router.GetStopId(edge.from))->name)
+                    .Key("time").Value(router.GetParametrs().wait_time_)
                     .Key("type").Value("Wait")
                 .EndDict()
             .Build()));
-            total_time += edge.weight;
-        }
-        else {
             items.emplace_back(json::Node(json::Builder{}
                 .StartDict()
-                    .Key("bus").Value(edge.name)
-                    .Key("span_count").Value(static_cast<int>(edge.quality))
-                    .Key("time").Value(edge.weight)
+                    .Key("bus").Value(edge.bus_name)
+                    .Key("span_count").Value(edge.span_count)
+                    .Key("time").Value(edge.weight - router.GetParametrs().wait_time_)
                     .Key("type").Value("Bus")
                 .EndDict()
             .Build()));
-
-            total_time += edge.weight;
         }
-    }
-
     result = json::Builder{}
         .StartDict()
             .Key("request_id").Value(id)
-            .Key("total_time").Value(total_time)
+            .Key("total_time").Value(routing.value().weight)
             .Key("items").Value(items)
         .EndDict()
     .Build();
@@ -159,4 +150,5 @@ else {
 return result;
 }
     
+
 }

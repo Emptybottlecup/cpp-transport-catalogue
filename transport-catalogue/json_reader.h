@@ -14,5 +14,5 @@ json::Node PrintStop(json::Dict map,TransportCatalogue& cata);
  
 json::Node PrintMap(json::Dict request_map, MapRender map, TransportCatalogue& cata); 
 
-json::Node PrintRouting(json::Dict map,transport::Router& router);  
+json::Node PrintRouting(json::Dict map,TransportRouter& router, TransportCatalogue& cata);  
 }

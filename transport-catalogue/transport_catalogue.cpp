@@ -18,7 +18,6 @@ namespace transport_catalog
       
         road_objects::Route bus(name,stops,is_roundtrip); 
      bus.un_stop = un; 
-     bus.stops_for_graph = stops;
         for(auto i : stops) { 
             bus.unique.insert(i); 
         } 

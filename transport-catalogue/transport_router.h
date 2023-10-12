@@ -1,30 +1,38 @@
 #pragma once
 
-#include "router.h"
 #include "transport_catalogue.h"
-
+#include "router.h"
 #include <memory>
 
-namespace transport {
 
-class Router {
-public:
-	Router(int wait_time, double bus_velocity,transport_catalog::TransportCatalogue& cata) {
-		bus_wait_time_ = wait_time;
-		bus_velocity_ = bus_velocity;
-		BuildGraph(cata);
-	}
+	struct Parametrs {
+		double wait_time_ = 0;
+		double velocity_ = 0;
+	};
 
-	graph::DirectedWeightedGraph<double>& BuildGraph(transport_catalog::TransportCatalogue& cata);
-	std::optional<graph::Router<double>::RouteInfo> FindRoute(std::string& stop_from,std::string& stop_to);
-	graph::DirectedWeightedGraph<double>& GetGraph();
+	class TransportRouter {
+	public:
 
-private:
-	int bus_wait_time_ = 0;
-	double bus_velocity_ = 0.0;
-	graph::DirectedWeightedGraph<double> graph_;
-	std::map<std::string, graph::VertexId> stop_ids_;
-	std::unique_ptr<graph::Router<double>> router_;
-};
+		TransportRouter() = default;
 
-}
+		TransportRouter(Parametrs& param);
+        
+        void CreateGraph(transport_catalog::TransportCatalogue& catalogue_);
+
+		std::optional<graph::Router<double>::RouteInfo> FindRoute(const std::string_view stop_name_from, const std::string_view stop_name_to);
+
+		graph::DirectedWeightedGraph<double>& GetGraph();
+        
+		std::unique_ptr<graph::Router<double>>& GetRouter();
+
+		Parametrs& GetParametrs();
+
+		std::string_view GetStopId(size_t id);
+        
+	private:
+		Parametrs param_;
+		std::map<std::string_view, uint32_t> stop_id_;
+		std::unordered_map<uint32_t, std::string_view> id_stop_;
+		std::unique_ptr<graph::Router<double>> router_ = nullptr;
+		graph::DirectedWeightedGraph<double> graph_;
+	};

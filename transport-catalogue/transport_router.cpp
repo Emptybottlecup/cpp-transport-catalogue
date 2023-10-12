@@ -1,65 +1,49 @@
 #include "transport_router.h"
 
-namespace transport {
+	TransportRouter::TransportRouter(Parametrs& param) : param_(param) {}
 
-graph::DirectedWeightedGraph<double>& Router::BuildGraph(transport_catalog::TransportCatalogue& cata) {
-	const auto& all_stops = cata.GetStopsMap();
-	const auto& all_buses = cata.GetBus();
-	graph::DirectedWeightedGraph<double> stops_graph(all_stops.size() * 2);
-    std::map<std::string, graph::VertexId> stop_ids;
-    graph::VertexId vertex_id = 0;
+	void TransportRouter::CreateGraph(transport_catalog::TransportCatalogue& cata) {
+        size_t stop_id = 0;
+		auto stops = cata.GetStopsMap();
+		for (auto stop : stops) {
+			stop_id_.insert({ stop.first, stop_id });
+			id_stop_.insert({ stop_id, stop.first });
+            ++stop_id;
+		}
+        graph_ = std::move(graph::DirectedWeightedGraph<double>{stop_id_.size()});
+		for (auto [bus_name, route_stats] : cata.GetBus()) {
+			auto stops_in_bus = route_stats->stops;
+			for (int i = 0; i < stops_in_bus.size() - 1; ++i) {
+			    double route_time = param_.wait_time_;
+			    auto from = stops_in_bus[i];
+			    int span_count_ = 1;
+			    for (int j = i + 1; j < stops_in_bus.size(); ++j) {
+				    auto to = stops_in_bus[j];
+                    auto distance = cata.GetDistance(stops_in_bus[j - 1]->name,to->name);
+				    route_time += (distance/(param_.velocity_ * 1000)) * 60;
+				    graph_.AddEdge({ stop_id_[from->name], stop_id_[to->name], route_time,cata.GetBus().at(bus_name)->name,span_count_});
+                    ++span_count_;
+			    }
+		    }
+		}
+		router_ = std::make_unique<graph::Router<double>>(graph::Router(graph_));
+	}
 
-    for (const auto& [stop_name, stop_info] : all_stops) {
-        stop_ids[stop_info->name] = vertex_id;
-        stops_graph.AddEdge({
-                stop_info->name,
-                0,
-                vertex_id,
-                ++vertex_id,
-                static_cast<double>(bus_wait_time_)
-            });
-        ++vertex_id;
-    }
-    stop_ids_ = std::move(stop_ids);
+	std::optional <graph::Router<double>::RouteInfo> TransportRouter::FindRoute(const std::string_view stop_name_from, const std::string_view stop_name_to) {
+        if(!router_) {
+	        return std::nullopt;
+		}
+		return router_->BuildRoute(stop_id_.at(stop_name_from), stop_id_.at(stop_name_to));
+	}
 
-    for_each(
-        all_buses.begin(),
-        all_buses.end(),
-        [&stops_graph, this, &cata](const auto& item) {
-            const auto& bus_info = item.second;
-            const auto& stops = bus_info->stops;
-            size_t stops_count = stops.size();
-            for (size_t i = 0; i < stops_count; ++i) {
-                for (size_t j = i + 1; j < stops_count; ++j) {
-                    transport_catalog::road_objects::Stop* stop_from = stops[i];
-                    transport_catalog::road_objects::Stop* stop_to = stops[j];
-                    int dist_sum = 0;
-                    int dist_sum_inverse = 0;
-                    for (size_t k = i + 1; k <= j; ++k) {
-                        dist_sum += cata.GetDistance((stops[k - 1])->name, (stops[k])->name);
-                        dist_sum_inverse += cata.GetDistance((stops[k - 1])->name, (stops[k])->name);
-                    }
-                    stops_graph.AddEdge({ bus_info->name,
-                                          j - i,
-                                          stop_ids_.at(stop_from->name) + 1,
-                                          stop_ids_.at(stop_to->name),
-                                          static_cast<double>(dist_sum) / (bus_velocity_ * (100.0 / 6.0))});
-                }
-            }
-        });
+	graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() {
+		return graph_;
+	}
 
-    graph_ = std::move(stops_graph);
-    router_ = std::make_unique<graph::Router<double>>(graph_);
+	Parametrs& TransportRouter::GetParametrs() {
+		return param_;
+	}
 
-    return graph_;
-}
-
-std::optional<graph::Router<double>::RouteInfo> Router::FindRoute(std::string& stop_from,std::string& stop_to) {
-	return router_->BuildRoute(stop_ids_.at(std::string(stop_from)),stop_ids_.at(std::string(stop_to)));
-}
-
-graph::DirectedWeightedGraph<double>& Router::GetGraph() {
-	return graph_;
-}
-
-}
+	 std::string_view TransportRouter::GetStopId(size_t id) {
+		return id_stop_.at(id);
+	}

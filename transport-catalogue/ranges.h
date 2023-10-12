@@ -30,7 +30,7 @@ private:
 
 template <typename C>
 auto AsRange(const C& container) {
-    return Range{ container.begin(), container.end() };
+    return Range{container.begin(), container.end()};
 }
 
 }  // namespace ranges

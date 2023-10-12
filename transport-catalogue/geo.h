@@ -17,4 +17,4 @@ struct Coordinates {
  
 double ComputeDistance(Coordinates from, Coordinates to); 
  
-}  // namespace geo
+}
