@@ -121,7 +121,7 @@ else {
     json::Array items;
     items.reserve(routing.value().edges.size());
     for (auto& edge_id : routing.value().edges) {
-        const graph::Edge<double> edge = router.GetGraph().GetEdge(edge_id);
+        const graph::Edge<double> edge = router.GetEdgeFromGraph(edge_id);
             items.emplace_back(json::Node(json::Builder{}
                 .StartDict()
                     .Key("stop_name").Value((cata.GetStopsMap()).at(router.GetStopId(edge.from))->name)

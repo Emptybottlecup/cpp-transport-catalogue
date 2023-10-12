@@ -21,7 +21,7 @@
 
 		std::optional<graph::Router<double>::RouteInfo> FindRoute(const std::string_view stop_name_from, const std::string_view stop_name_to);
 
-		graph::DirectedWeightedGraph<double>& GetGraph();
+	    const graph::Edge<double>& GetEdgeFromGraph(size_t id) const;
         
 		std::unique_ptr<graph::Router<double>>& GetRouter();
 
@@ -29,6 +29,9 @@
 
 		std::string_view GetStopId(size_t id);
         
+        void CreateMaps(transport_catalog::TransportCatalogue& catalog);
+        
+        void FillGraph(transport_catalog::TransportCatalogue& catalog);
 	private:
 		Parametrs param_;
 		std::map<std::string_view, uint32_t> stop_id_;
