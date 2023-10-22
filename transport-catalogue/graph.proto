@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package proto_graph;
+
+message Edge {
+    int32 from = 1;
+    int32 to = 2;
+    double weight = 3;
+    string name = 4;
+    int32 span_count = 5;
+}
+
+message Graph {
+    repeated Edge edge = 1;
+}

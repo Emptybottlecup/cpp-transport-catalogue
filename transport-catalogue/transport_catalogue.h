@@ -49,6 +49,7 @@ public:
     void AddBus(const std::string& name, std::vector<road_objects::Stop*>& stops, bool is_roundtrip); 
     road_objects::Route* FindBus(std::string bus) const; 
     road_objects::Stop* FindStop(std::string name) const; 
-    std::map<std::string_view,road_objects::Stop*>& GetStopsMap(); 
+    std::map<std::string_view,road_objects::Stop*>& GetStopsMap();
+    std::map<std::pair<std::string,std::string>,int>& GetDist();
 }; 
 }

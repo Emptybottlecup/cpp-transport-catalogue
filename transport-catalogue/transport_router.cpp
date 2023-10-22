@@ -19,10 +19,6 @@ std::optional <graph::Router<double>::RouteInfo> TransportRouter::FindRoute(cons
 Parametrs& TransportRouter::GetParametrs() {
     return param_;
 }
-
-std::string_view TransportRouter::GetStopId(size_t id) {
-	return id_stop_.at(id);
-}
     
 void TransportRouter::CreateMaps(transport_catalog::TransportCatalogue& catalog) {
     size_t stop_id = 0;
@@ -54,4 +50,26 @@ void TransportRouter::FillGraph(transport_catalog::TransportCatalogue& catalog) 
 
 const graph::Edge<double>& TransportRouter::GetEdgeFromGraph(size_t id) const {
     return graph_.GetEdge(id);
+}
+
+std::string_view TransportRouter::GetStopId(size_t id) {
+    return id_stop_.at(id);
+}
+
+void TransportRouter::SetGraph(graph::DirectedWeightedGraph<double> graph, std::map<std::string, uint32_t> stop_id) {
+    graph_ = graph;
+    for(auto i : stop_id) {
+    names.push_back(i.first);
+    stop_id_[names.back()] = static_cast<uint32_t>(i.second);
+    id_stop_[i.second] = names.back();
+    }
+    router_ = std::make_unique<graph::Router<double>>(graph_);
+}
+
+std::map<std::string_view, uint32_t> TransportRouter::GetStopIds() {
+    return stop_id_;
+}
+
+graph::DirectedWeightedGraph<double>& TransportRouter::GetGraph() {
+    return graph_;
 }

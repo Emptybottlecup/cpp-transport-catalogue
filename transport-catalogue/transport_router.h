@@ -30,12 +30,15 @@
 		std::string_view GetStopId(size_t id);
         
         void CreateMaps(transport_catalog::TransportCatalogue& catalog);
-        
         void FillGraph(transport_catalog::TransportCatalogue& catalog);
+        void SetGraph(graph::DirectedWeightedGraph<double> graph, std::map<std::string, uint32_t> stop_ids);
+        std::map<std::string_view, uint32_t> GetStopIds();
+        graph::DirectedWeightedGraph<double>& GetGraph();
 	private:
 		Parametrs param_;
 		std::map<std::string_view, uint32_t> stop_id_;
 		std::unordered_map<uint32_t, std::string_view> id_stop_;
 		std::unique_ptr<graph::Router<double>> router_ = nullptr;
 		graph::DirectedWeightedGraph<double> graph_;
+        std::deque<std::string> names; 
 	};

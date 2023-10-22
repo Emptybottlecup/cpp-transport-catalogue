@@ -90,7 +90,7 @@ json::Node PrintStop(json::Dict map,TransportCatalogue& catalog) {
   } 
    else { 
        json::Array buses; 
-       for(auto i : catalog.FindStop(stop_name)->buses) { 
+       for(auto i : catalog.FindStop(stop_name)->buses) {;
            buses.push_back(i); 
        } 
         result = json::Builder{} 

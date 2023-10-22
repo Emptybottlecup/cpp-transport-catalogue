@@ -100,8 +100,8 @@ struct MapRender {
     std::vector<svg::Text> GetBusLabel(std::map<std::string_view, transport_catalog::road_objects::Route*> buses, SphereProjector& sp); 
     std::vector<svg::Circle> GetStopsSymbols(std::map<std::string_view, transport_catalog::road_objects::Stop*> stops, SphereProjector& sp); 
     std::vector<svg::Text> GetStopsLabels(std::map<std::string_view, transport_catalog::road_objects::Stop*> stops, SphereProjector& sp); 
-}; 
- 
+};
+
 inline MapRender CreateMapRender(json::Dict request_map) { 
     MapRender maprender; 
     maprender.width = request_map.at("width").AsDouble(); 

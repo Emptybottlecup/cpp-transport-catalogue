@@ -88,5 +88,8 @@ int TransportCatalogue::GetDistance(std::string from, std::string to) {
     std::map<std::string_view,road_objects::Route*>& TransportCatalogue::GetBus() {
     return routs_map; 
 }
-    
+ 
+    std::map<std::pair<std::string,std::string>,int>& TransportCatalogue::GetDist() {
+        return dist;
+    }
 }

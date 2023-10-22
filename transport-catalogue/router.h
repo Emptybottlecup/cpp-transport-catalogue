@@ -114,4 +114,4 @@ std::optional<typename Router<Weight>::RouteInfo> Router<Weight>::BuildRoute(Ver
     return RouteInfo{weight, std::move(edges)};
 }
 
-}  // namespace graph
+}
